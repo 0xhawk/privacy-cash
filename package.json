@@ -2,8 +2,9 @@
   "name": "privacy-cash",
   "license": "MIT",
   "scripts": {
-    "build:circuits": "bash ./scripts/build_circuits.sh",
-    "build": "yarn build:circuits"
+    "build:circuits": "bash ./scripts/build_circuits.sh && bash ./scripts/build_verifier.sh",
+    "build:hasher": "node ./scripts/compileHasher.js",
+    "build": "yarn build:circuits && yarn build:hasher"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.2",
