@@ -65,7 +65,7 @@ abstract contract Privacy is MerkleTree, ReentrancyGuard {
         nullifierHashes[_nullifierHash] = true;
         _processWithdraw(_recepient, _relayer, _fee, _refund);
 
-        //
+        emit Withdrawal(_recepient, _nullifierHash, _relayer, _fee);
     }
 
     function _processWithdraw(
@@ -74,4 +74,8 @@ abstract contract Privacy is MerkleTree, ReentrancyGuard {
         uint256 _fee,
         uint256 _refund
     ) internal virtual;
+
+    function isSpent(bytes32 _nullifierHash) public view returns (bool) {
+        return nullifierHashes[_nullifierHash];
+    }
 }
