@@ -4,7 +4,8 @@
   "scripts": {
     "build:circuits": "bash ./scripts/build_circuits.sh && bash ./scripts/build_verifier.sh",
     "build:hasher": "node ./scripts/compileHasher.js",
-    "build": "yarn build:circuits && yarn build:hasher"
+    "build": "yarn build:circuits && yarn build:hasher",
+    "test": "npx hardhat test"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.2",

@@ -12,7 +12,7 @@ function createCode(seed, n) {
 
     const C = new Contract();
 
-    C.push(0x44);
+    C.push(0x64);
     C.push("0x00");
     C.push("0x00");
     C.calldatacopy();
@@ -20,63 +20,69 @@ function createCode(seed, n) {
     C.push("0x00");
     C.mload();
     C.div();
-    C.push("0xd15ca109"); // MiMCpe7(uint256,uint256)
-//    C.push("0x8c42199e"); // MiMCpe7(uint256,uint256,uint256)
+    C.push("0x3f1a1187"); // MiMCSponge(uint256,uint256,uint256)
     C.eq();
     C.jmpi("start");
     C.invalid();
 
     C.label("start");
     C.push("0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001");  // q
-    C.push("0x24");
+    C.push("0x44");
     C.mload();          // k q
-
-
-    C.dup(1);           // q k q
-    C.dup(0);           // q q k q
     C.push("0x04");
-    C.mload();          // x q q k q
-    C.dup(3);           // k x q q k q
-    C.addmod();         // t=x+k q k q
-    C.dup(1);           // q t q k q
-    C.dup(0);           // q q t q k q
-    C.dup(2);           // t q q t q k q
-    C.dup(0);           // t t q q t q k q
-    C.mulmod();         // a=t^2 q t q k q
-    C.dup(1);           // q a q t q k q
-    C.dup(1);           // a q a q t q k q
-    C.dup(0);           // a a q a q t q k q
-    C.mulmod();         // b=t^4 a q t q k q
-    C.mulmod();         // c=t^6 t q k q
-    C.mulmod();         // r=t^7 k q
+    C.mload();          // xL k q
+    C.dup(2);           // q xL k q
+    C.push("0x24");
+    C.mload();          // xR q xL k q
+    C.dup(1);           // q xR q xL k q
+    C.dup(0);           // q q xR q xL k q
+    C.dup(4);           // xL q q xR q xL k q
+    C.dup(6);           // k xL q q xR q xL k q
+    C.addmod();         // t=k+xL q xR q xL k q
+    C.dup(1);           // q t q xR q xL k q
+    C.dup(0);           // q q t q xR q xL k q
+    C.dup(2);           // t q q t q xR q xL k q
+    C.dup(0);           // t t q q t q xR q xL k q
+    C.mulmod();         // b=t^2 q t q xR q xL k q
+    C.dup(0);           // b b q t q xR q xL k q
+    C.mulmod();         // c=t^4 t q xR q xL k q
+    C.mulmod();         // d=t^5 xR q xL k q
+    C.addmod();         // e=t^5+xR xL k q (for next round: xL xR k q)
 
     for (let i=0; i<n-1; i++) {
-        ci = Web3Utils.keccak256(ci);
-        C.dup(2);       // q r k q
-        C.dup(0);       // q q r k q
-        C.dup(0);       // q q q r k q
-        C.swap(3);      // r q q q k q
-        C.push(ci);     // c r q q k q
-        C.addmod();     // s=c+r q q k q
-        C.dup(3);       // k s q q k q
-        C.addmod();     // t=s+k q k q
-        C.dup(1);       // q t q k q
-        C.dup(0);       // q q t q k q
-        C.dup(2);       // t q q t q k q
-        C.dup(0);       // t t q q t q k q
-        C.mulmod();     // a=t^2 q t q k q
-        C.dup(1);       // q a q t q k q
-        C.dup(1);       // a q a q t q k q
-        C.dup(0);       // a a q a q t q k q
-        C.mulmod();     // b=t^4 a q t q k q
-        C.mulmod();     // c=t^6 t q k q
-        C.mulmod();     // r=t^7 k q
+        if (i < n-2) {
+          ci = Web3Utils.keccak256(ci);
+        } else {
+          ci = "0x00";
+        }
+        C.swap(1);      // xR xL k q
+        C.dup(3);       // q xR xL k q
+        C.dup(3);       // k q xR xL k q
+        C.dup(1);       // q k q xR xL k q
+        C.dup(4);       // xL q k q xR xL k q
+        C.push(ci);     // ci xL q k q xR xL k q
+        C.addmod();     // a=ci+xL k q xR xL k q
+        C.addmod();     // t=a+k xR xL k q
+        C.dup(4);       // q t xR xL k q
+        C.swap(1);      // t q xR xL k q
+        C.dup(1);       // q t q xR xL k q
+        C.dup(0);       // q q t q xR xL k q
+        C.dup(2);       // t q q t q xR xL k q
+        C.dup(0);       // t t q q t q xR xL k q
+        C.mulmod();     // b=t^2 q t q xR xL k q
+        C.dup(0);       // b b q t q xR xL k q
+        C.mulmod();     // c=t^4 t q xR xL k q
+        C.mulmod();     // d=t^5 xR xL k q
+        C.dup(4);       // q d xR xL k q
+        C.swap(2);      // xR d q xL k q
+        C.addmod();     // e=t^5+xR xL k q (for next round: xL xR k q)
     }
 
-    C.addmod();     // res=t^7+k
-    C.push("0x00");
-    C.mstore();     // Save it to pos 0;
     C.push("0x20");
+    C.mstore();     // Save it to pos 0;
+    C.push("0x00");
+    C.mstore();     // Save it to pos 1;
+    C.push("0x40");
     C.push("0x00");
     C.return();
 
@@ -88,18 +94,26 @@ module.exports.abi = [
         "constant": true,
         "inputs": [
             {
-                "name": "in_x",
+                "name": "xL_in",
                 "type": "uint256"
             },
             {
-                "name": "in_k",
+                "name": "xR_in",
+                "type": "uint256"
+            },
+            {
+                "name": "k",
                 "type": "uint256"
             }
         ],
-        "name": "MiMCpe7",
+        "name": "MiMCSponge",
         "outputs": [
             {
-                "name": "out_x",
+                "name": "xL",
+                "type": "uint256"
+            },
+            {
+                "name": "xR",
                 "type": "uint256"
             }
         ],
