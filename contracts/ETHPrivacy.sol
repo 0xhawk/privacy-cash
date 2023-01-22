@@ -12,7 +12,7 @@ contract ETHPrivacy is Privacy {
     ) Privacy(_verifier, _denomination, _merkleTreeHeight, _hasher) {}
 
     function _processDeposit() internal override {
-        require(msg.value == denomination, "Please send `minDenomination` ETH along with transaction");
+        require(msg.value == denomination, "Please send `mixDenomination` ETH along with transaction");
     }
 
     function _processWithdraw(

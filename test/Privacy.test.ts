@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract, ContractFactory, utils } from "ethers";
 import path from "path";
+import { toFixedHex } from "../utils/ethers";
 
 // build
 const HasherPath = "../build/contracts/Hasher.json";
@@ -35,4 +36,26 @@ describe("Privacy #constructor", () => {
     it("should initialize ", async () => {
         expect(await privacy.denomination()).to.equal(denomination);
     });
-})
+});
+
+describe("Privacy #deposit", () => {
+    it("should emit event", async () => {
+        const commitment = toFixedHex(42);
+        await expect(privacy.deposit(commitment, { value: utils.parseEther("1") })).to.emit(privacy, "Deposit");
+    });
+
+    it("should revert if there is a such commitment", async () => {
+        const commitment = toFixedHex(42)
+        await privacy.deposit(commitment, { value: utils.parseEther("1") })
+        await expect(privacy.deposit(commitment, { value: utils.parseEther("1") })).to.be.revertedWith(
+            "The commitment has been submitted",
+        );
+    });
+
+    it("should revert if ETH amount not equal to denonination", async () => {
+        const commitment = toFixedHex(42);
+        await expect(privacy.deposit(commitment, { value: utils.parseEther("2") })).to.be.revertedWith(
+            "Please send `mixDenomination` ETH along with transaction",
+        );
+    });
+});
