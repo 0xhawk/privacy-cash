@@ -2,11 +2,7 @@
 pragma solidity ^0.8.0;
 
 interface Hasher {
-    function MiMCSponge(
-        uint256 xL_in,
-        uint256 xR_in,
-        uint256 k
-    ) external pure returns (uint256 xL, uint256 xR);
+    function MiMCSponge(uint256 xL_in, uint256 xR_in, uint256 k) external pure returns (uint256 xL, uint256 xR);
 }
 
 contract MerkleTree {
@@ -57,7 +53,7 @@ contract MerkleTree {
 
     function _insert(bytes32 _leaf) internal returns (uint32 index) {
         uint32 currentIndex = nextIndex;
-        require(currentIndex < uint32(2)**levels, "Merkle tree is full. No more leaf can be added");
+        require(currentIndex < uint32(2) ** levels, "Merkle tree is full. No more leaf can be added");
         nextIndex += 1;
         bytes32 currentLevelHash = _leaf;
         bytes32 left;
